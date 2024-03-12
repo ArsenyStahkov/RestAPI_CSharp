@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Jint;
 using WebApplication1.Program;
+using Microsoft.Extensions.Options;
 
 namespace WebApplication1.Controllers
 {
@@ -46,8 +47,9 @@ namespace WebApplication1.Controllers
             if (context.Request.Path == "/test-post")
             {
                 IFormCollection form = context.Request.Form;
-                int firstNum = Int32.Parse(form["firstNum"]);
-                int secondNum = Int32.Parse(form["secondNum"]);
+                int first = Int32.Parse(form["first"]);
+                int second = Int32.Parse(form["second"]);
+                int sum = first + second;
 
                 int i = 0;
                 for (; i < _endpointsPost.Length; i++)
@@ -59,18 +61,19 @@ namespace WebApplication1.Controllers
                     }
                 }
 
-                var fromValue = engine.Execute("function " + _scriptsPost[i] + "(a, b) " +
-                    "{ return a + b; }").GetValue(_scriptsPost[i]);
-                string res = fromValue.Call(firstNum, secondNum).ToString();
-                Console.WriteLine(res);
+                //var fromValue = engine.Execute("function " + _scriptsGet[i] + "(option) " +
+                //    "{ return option; }").GetValue(_scriptsGet[i]);
 
-                return CreatedAtAction("", context.Response.WriteAsync($"<div><p>Result: {res}</p></div>"));
-                //await context.Response.WriteAsync($"<div><p>Result: {res}</p></div>");
+                //foreach (var option in options)
+                //    Console.Write(fromValue.Call(option) + "\t");
+
+                //Console.WriteLine();
+
+                return CreatedAtAction("", context.Response.WriteAsync($"<div><p>Result: {sum}</p></div>"));
             }
             else
             {
                 return CreatedAtAction("", context.Response.SendFileAsync("html/index.html"));
-                //await context.Response.SendFileAsync("html/index.html");
             }
         }
     }

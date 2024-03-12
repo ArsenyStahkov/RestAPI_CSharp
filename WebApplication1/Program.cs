@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SQLite;
 using System.Data;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore;
+using Microsoft.Extensions.Logging.EventLog;
 
 namespace WebApplication1.Program
 {
@@ -25,10 +28,10 @@ namespace WebApplication1.Program
         public static string[] _scriptsGet;
         public static string[] _scriptsPost;
 
-        public static void Connect()
-        {
-            ServerParameters svPm = new ServerParameters();
+        static ServerParameters _svPm = new ServerParameters();
 
+        public static void OnStartup()
+        {
             string source = "D:\\Programming\\C#\\TestWebApp\\TestWebApp\\Databases\\Devices.db";
             SQLiteConnection connection = new SQLiteConnection("Data Source=" + source);
             connection.Open();
@@ -92,25 +95,42 @@ namespace WebApplication1.Program
             }
         }
 
+        // Инициализация сервера
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args, string ContentRoot)
+        {
+            // Корневой узел конфигурации
+            var configuration = new ConfigurationBuilder()
+
+            .AddCommandLine(args)
+                    .Build();
+            // Вызов конструктора Startup
+            Startup.Configuration = configuration;
+
+            return WebHost.CreateDefaultBuilder(args)
+                .ConfigureServices(services =>
+                {
+                    services.Configure<EventLogSettings>(config =>
+                    {
+                        config.LogName = "WCS API Service";
+                        config.SourceName = "WCS API Service Source";
+                    });
+                    //services.AddHostedService<Worker>();
+                })
+                .UseStartup<Startup>()
+                .UseContentRoot(ContentRoot)
+                .UseKestrel()
+                // "http" + "localhost" + ":" + "8085"
+                .UseUrls(_svPm.Http + "://" + _svPm.Address + ":" + _svPm.Port)
+                .SuppressStatusMessages(true)
+                ;
+        }
+
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddControllers();  // добавляем поддержку контроллеров
-            WebApplication app = builder.Build();
-
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Error");
-                app.UseHsts();
-            }
-
-            // устанавливаем сопоставление маршрутов с контроллерами
-            app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{endpoint?}");
-
             // Подключение к БД и формирование массивов
-            Connect();
+            OnStartup();
 
-            app.Run();
+            CreateWebHostBuilder(args, Directory.GetCurrentDirectory()).Build().Run();
         }
     }
 }
