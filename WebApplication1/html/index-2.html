@@ -1,14 +1,9 @@
-﻿<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-</head>
-<body>
-    <h2>User form</h2>
-    <form method="post" action=".\index-answer.html">
-        <p>First number: <input num="firstNum" type="number" /></p>
-        <p>Second number: <input num="secondNum" type="number" /></p>
-        <input type="submit" value="Send" />
-    </form>
-</body>
-</html>
+﻿<form method='post'>
+	<label>List_1:</label><br />
+	<input type='number' name='options[]' /><br />
+	<label>List_2:</label><br />
+	<input type='number' name='options[]' /><br />
+	<label>List_3:</label><br />
+	<input type='number' name='options[]' /><br />
+	<input type='submit' value='Send' />
+</form>

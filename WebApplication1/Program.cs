@@ -23,10 +23,8 @@ namespace WebApplication1.Program
 
     public class ProgramMain : Controller
     {
-        public static string[] _endpointsGet;
-        public static string[] _endpointsPost;
-        public static string[] _scriptsGet;
-        public static string[] _scriptsPost;
+        public static string[] _endpoints;
+        public static string[] _scripts;
 
         static ServerParameters _svPm = new ServerParameters();
 
@@ -50,48 +48,26 @@ namespace WebApplication1.Program
                 return dataTable;
             }
 
-            // Endpoints GET
-            DataTable tableGet = GetDataTable(connection, "SELECT endpoint FROM 'test_get_post' WHERE type='get';");
-            Console.WriteLine($"Прочитано {tableGet.Rows.Count} endpoint-ов GET из таблицы БД\n");
-            _endpointsGet = new string[tableGet.Rows.Count];
+            // Endpoints
+            DataTable tableEnpoints = GetDataTable(connection, "SELECT endpoint FROM 'test_get_post';");
+            Console.WriteLine($"Прочитано {tableEnpoints.Rows.Count} endpoint-ов GET из таблицы БД\n");
+            _endpoints = new string[tableEnpoints.Rows.Count];
 
-            // Endpoints POST
-            DataTable tablePost = GetDataTable(connection, "SELECT endpoint FROM 'test_get_post' WHERE type='post';");
-            Console.WriteLine($"Прочитано {tablePost.Rows.Count} endpoint-ов POST из таблицы БД\n");
-            _endpointsPost = new string[tablePost.Rows.Count];
+            // Scripts
+            DataTable tableScripts = GetDataTable(connection, "SELECT script FROM 'test_get_post';");
+            Console.WriteLine($"Прочитано {tableScripts.Rows.Count} скриптов GET из таблицы БД\n");
+            _scripts = new string[tableScripts.Rows.Count];
 
-            // Scripts GET
-            DataTable tableScriptsGet = GetDataTable(connection, "SELECT script FROM 'test_get_post' WHERE type='get';");
-            Console.WriteLine($"Прочитано {tableScriptsGet.Rows.Count} скриптов GET из таблицы БД\n");
-            _scriptsGet = new string[tableScriptsGet.Rows.Count];
-
-            // Scripts POST
-            DataTable tableScriptsPost = GetDataTable(connection, "SELECT script FROM 'test_get_post' WHERE type='post';");
-            Console.WriteLine($"Прочитано {tableScriptsPost.Rows.Count} скриптов POST из таблицы БД\n");
-            _scriptsPost = new string[tableScriptsPost.Rows.Count];
-
-            foreach (DataRow row in tableGet.Rows)
+            foreach (DataRow row in tableEnpoints.Rows)
             {
                 if (row.Field<string>("endpoint") != null)
-                    _endpointsGet[tableGet.Rows.IndexOf(row)] = row.Field<string>("endpoint");
+                    _endpoints[tableEnpoints.Rows.IndexOf(row)] = row.Field<string>("endpoint");
             }
 
-            foreach (DataRow row in tablePost.Rows)
-            {
-                if (row.Field<string>("endpoint") != null)
-                    _endpointsPost[tablePost.Rows.IndexOf(row)] = row.Field<string>("endpoint");
-            }
-
-            foreach (DataRow row in tableScriptsGet.Rows)
+            foreach (DataRow row in tableScripts.Rows)
             {
                 if (row.Field<string>("script") != null)
-                    _scriptsGet[tableScriptsGet.Rows.IndexOf(row)] = row.Field<string>("script");
-            }
-
-            foreach (DataRow row in tableScriptsPost.Rows)
-            {
-                if (row.Field<string>("script") != null)
-                    _scriptsPost[tableScriptsPost.Rows.IndexOf(row)] = row.Field<string>("script");
+                    _scripts[tableScripts.Rows.IndexOf(row)] = row.Field<string>("script");
             }
         }
 

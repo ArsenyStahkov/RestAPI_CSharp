@@ -1,80 +1,63 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Jint;
 using WebApplication1.Program;
-using Microsoft.Extensions.Options;
 
 namespace WebApplication1.Controllers
 {
     [Route("/{endpoint}")]
     public class HomeController : ProgramMain
     {
-        Engine engine = new Engine();
-
-        [HttpGet]
-        public void Get(List<int> options)
+        public void UseJint(List<string> options, string endpoint)
         {
-            string endpoint = "/" + RouteData.Values["endpoint"].ToString();
-
             int i = 0;
-            for (; i < _endpointsGet.Length; i++)
+            for (; i < _endpoints.Length; i++)
             {
-                if (_endpointsGet[i] == endpoint)
+                if (_endpoints[i] == endpoint)
                 {
                     Console.WriteLine("Endpoint: " + endpoint);
                     break;
                 }
 
-                if (i == _endpointsGet.Length - 1)
+                if (i == _endpoints.Length - 1)
                 {
                     return;
                 }
             }
 
-            var fromValue = engine.Execute("function " + _scriptsGet[i] + "(option) " +
-                "{ return option; }").GetValue(_scriptsGet[i]);
+            if (options.Count > 0)
+            {
+                Engine engine = new Engine();
 
-            foreach (var option in options)
-                Console.Write(fromValue.Call(option) + "\t");
+                engine.SetValue("log", new Action<object>(Console.WriteLine));
+                engine.Execute(_scripts[i]);
+                engine.Invoke("GetArr", options);
+            }
+        }
 
-            Console.WriteLine();
+        [HttpGet]
+        public async Task Get(List<string> options)
+        {
+            string endpoint = "/" + RouteData.Values["endpoint"].ToString();
+            UseJint(options, endpoint);
+            StreamReader reader = new StreamReader("html/index.html");
+            string content = await reader.ReadToEndAsync();
+            Response.ContentType = "text/html;charset=utf-8";
+
+            await Response.WriteAsync(content);
         }
 
         [HttpPost]
-        public IActionResult Post(HttpContext context)
+        public List<string> Post()
         {
-            context.Response.ContentType = "text/html; charset=utf-8";
+            string[] optArray = Request.Form["options[]"];
+            List<string> options = new List<string>();
+            for (int i = 0; i < optArray.Length; i++)
+                options.Add(optArray[i]);
 
-            if (context.Request.Path == "/test-post")
-            {
-                IFormCollection form = context.Request.Form;
-                int first = Int32.Parse(form["first"]);
-                int second = Int32.Parse(form["second"]);
-                int sum = first + second;
+            string endpoint = "/" + RouteData.Values["endpoint"].ToString();
+            UseJint(options, endpoint);
 
-                int i = 0;
-                for (; i < _endpointsPost.Length; i++)
-                {
-                    if (_endpointsPost[i] == "/test-post")
-                    {
-                        Console.WriteLine("Endpoint: /test-post");
-                        break;
-                    }
-                }
-
-                //var fromValue = engine.Execute("function " + _scriptsGet[i] + "(option) " +
-                //    "{ return option; }").GetValue(_scriptsGet[i]);
-
-                //foreach (var option in options)
-                //    Console.Write(fromValue.Call(option) + "\t");
-
-                //Console.WriteLine();
-
-                return CreatedAtAction("", context.Response.WriteAsync($"<div><p>Result: {sum}</p></div>"));
-            }
-            else
-            {
-                return CreatedAtAction("", context.Response.SendFileAsync("html/index.html"));
-            }
+            return options;
         }
     }
 }

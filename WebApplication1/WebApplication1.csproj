@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="C:\Users\tride\Downloads\index.html" Link="index.html" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Jint" Version="3.0.1" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
   </ItemGroup>
